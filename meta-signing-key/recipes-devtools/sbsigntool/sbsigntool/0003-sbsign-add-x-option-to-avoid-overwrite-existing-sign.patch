@@ -1,20 +1,20 @@
-From 0016a571a5ea1ab65817973f179800947e1aa8de Mon Sep 17 00:00:00 2001
-From: Lans Zhang <jia.zhang@windriver.com>
-Date: Fri, 15 Jan 2016 09:40:56 +0800
-Subject: [PATCH] sbsign: add -x option to avoid overwrite existing signature
-
-Upstream-Status: Pending
+From 9eedbadea5f0bc5367a8da35b76f0b257196d73e Mon Sep 17 00:00:00 2001
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date: Wed, 10 Mar 2021 15:53:21 +0200
+Subject: [PATCH 3/3] sbsign: add -x option to avoid overwrite existing
+ signature
 
 Signed-off-by: Lans Zhang <jia.zhang@windriver.com>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 ---
  src/sbsign.c | 17 +++++++++++++++--
  1 file changed, 15 insertions(+), 2 deletions(-)
 
 diff --git a/src/sbsign.c b/src/sbsign.c
-index dcf6eed..7dc101f 100644
+index 898fe669f9dd..3a5ed3248948 100644
 --- a/src/sbsign.c
 +++ b/src/sbsign.c
-@@ -66,6 +66,7 @@ struct sign_context {
+@@ -69,6 +69,7 @@ struct sign_context {
  };
  
  static struct option options[] = {
@@ -22,29 +22,29 @@ index dcf6eed..7dc101f 100644
  	{ "output", required_argument, NULL, 'o' },
  	{ "cert", required_argument, NULL, 'c' },
  	{ "key", required_argument, NULL, 'k' },
-@@ -87,6 +88,7 @@ static void usage(void)
- 		"\t--cert <certfile>  certificate (x509 certificate)\n"
+@@ -94,6 +95,7 @@ static void usage(void)
+ 		"\t--addcert <addcertfile> additional intermediate certificates in a file\n"
  		"\t--detached         write a detached signature, instead of\n"
  		"\t                    a signed binary\n"
 +		"\t--noresign         don't re-sign the binary if signed\n"
  		"\t--output <file>    write signed data to <file>\n"
  		"\t                    (default <efi-boot-image>.signed,\n"
  		"\t                    or <efi-boot-image>.pk7 for detached\n"
-@@ -114,7 +116,7 @@ int main(int argc, char **argv)
- 	const char *keyfilename, *certfilename;
+@@ -155,7 +157,7 @@ int main(int argc, char **argv)
+ 	const char *keyfilename, *certfilename, *addcertfilename, *engine;
  	struct sign_context *ctx;
  	uint8_t *buf, *tmp;
 -	int rc, c, sigsize;
 +	int rc, c, sigsize, no_resign = 0;
+ 	EVP_PKEY *pkey;
  
  	ctx = talloc_zero(NULL, struct sign_context);
- 
-@@ -123,11 +125,14 @@ int main(int argc, char **argv)
+@@ -167,11 +169,14 @@ int main(int argc, char **argv)
  
  	for (;;) {
  		int idx;
--		c = getopt_long(argc, argv, "o:c:k:dvVh", options, &idx);
-+		c = getopt_long(argc, argv, "xo:c:k:dvVh", options, &idx);
+-		c = getopt_long(argc, argv, "o:c:k:dvVhe:a:", options, &idx);
++		c = getopt_long(argc, argv, "xo:c:k:dvVhe:a:", options, &idx);
  		if (c == -1)
  			break;
  
@@ -55,7 +55,7 @@ index dcf6eed..7dc101f 100644
  		case 'o':
  			ctx->outfilename = talloc_strdup(ctx, optarg);
  			break;
-@@ -178,6 +183,14 @@ int main(int argc, char **argv)
+@@ -228,6 +233,14 @@ int main(int argc, char **argv)
  	if (!ctx->image)
  		return EXIT_FAILURE;
  
@@ -71,5 +71,5 @@ index dcf6eed..7dc101f 100644
  
  	ERR_load_crypto_strings();
 -- 
-1.9.1
+2.30.1
 
